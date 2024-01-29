@@ -1,1 +1,33 @@
-ECHO is on.
+server { 
+ listen 80; 
+ server_name ABC_Domain; 
+
+
+ # Location-based config 
+ location ~* \.(css|jpg|jpeg|js|json|png|mp4|pdf)$ { 
+ return 404; 
+ } 
+
+
+ # Access log format 
+ log_format custom_log '$time_local | $nginx_version | $remote_addr | $request_id | $status |  $body_bytes_sent | $http_user_agent | $proxy_protocol_addr | $server_name | $upstream_addr |  $request_time | $upstream_connect_time | $upstream_header_time | $upstream_response_time |  $request_uri | $upstream_status | $ssl_session_reused | $http_x_forwarded_for'; 
+ access_log /var/log/nginx/access.log custom_log; 
+
+
+ # HTTP security headers 
+ add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;  add_header X-Content-Type-Options "nosniff" always; 
+ add_header X-XSS-Protection "1; mode=block" always; 
+ add_header X-Frame-Options "DENY" always; 
+ add_header Content-Security-Policy "frame-ancestors 'none'" always; 
+ add_header Access-Control-Allow-Credentials "TRUE" always; 
+ location / { 
+ proxy_pass http://your_upstream_server;
+ proxy_set_header Host $host; 
+ proxy_set_header X-Real-IP $remote_addr; 
+ proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; 
+
+
+ # Additional proxy settings if needed 
+ # ... 
+ } 
+}
